@@ -17,6 +17,32 @@ Dumpvar(var=#PNG#);
 </cfscript>
 ```
 
+> [!IMPORTANT]
+> I decided to write this function in cfscript to get more used to the script based version of ColdFusion but that turned out to have side effects in that I am unable to trap or exclude code from excluding packages that are not installed. You will need to install the following packages in order to run the function or comment out the relevent block. You can search for "handle pdf" for the PDF logic for example.\
+> Run the following to install the required packages: `cfpm install pdf sqlserver spreadsheet`
+
+## Structs
+
+> [!CAUTION]
+> ColdFusion's `<CFDump>` tag has an error in how it handles case sensitive structs in that if you have the same string of text as a key name in different case such as "A" and "a", you can't filter on the lower case version. See [Bug Tracker CF-4229243](https://tracker.adobe.com/#/view/CF-4229243)
+
+Example of the bug
+```
+<cfset struct=structNew("casesensitive")>
+<CFSET Struct.A="A">
+<CFSET Struct.a="a">
+<CFSET Struct.B="B">
+<CFSET Struct.b="b">
+<CFSET Struct.C="C">
+<CFSET Struct.c="c">
+<cfdump var=#struct#>
+<cfdump var=#struct# show="b">
+<cfdump var=#struct# hide="b">
+```
+<img width="210" height="258" alt="image" src="https://github.com/user-attachments/assets/d3fb3db2-c076-48c4-955b-0d3341e32dee" />\
+The code states to eitehr show or hide the lower case "b" version. It either displays the upper case value with the lower case valuse or displays the upper case version of the lower case name.
+
+
 ## Arrays
 
 `CFDump` does not indicate if an array was created as a "fast array" which is not threadsafe.\
