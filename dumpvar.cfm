@@ -565,11 +565,15 @@ public function DumpVar(any Var,
 		return;
 	}
 
-	// Handle sqlserver query object
-	if (ListFindNoCase("QueryTable,QueryImpl",VarType)) {
+	// Handle query object
+	if (ListFindNoCase("QueryTable,QueryImpl,FileListTable",VarType)) {
 		if (ServerInfo[1] EQ "ColdFusion Server") {
 			QueryResult=QueryGetResult(Arguments.Var);
-			QuerySQL=EncodeForHTML(StripCR(QueryResult.SQL));
+			if (StructKeyExists(variables,"QueryResult")) {
+				QuerySQL=EncodeForHTML(StripCR(QueryResult.SQL));
+			} else {
+				QuerySQL="";
+			}
 		}
 		QueryColumns=GetMetadata(Arguments.var);
 		tmp=ReMatch("&##xa;(&##x9;)+",QuerySQL);
@@ -578,7 +582,7 @@ public function DumpVar(any Var,
 
 		if (Arguments.Format EQ "html") {
 
-			if (Arguments.metainfo AND ServerInfo[1] EQ "ColdFusion Server") {
+			if (Arguments.metainfo AND ServerInfo[1] EQ "ColdFusion Server" AND VarType NEQ "FileListTable") {
 				writeoutput('<table class="cfdump_query">' & C &
 							'	<tr>' & C &
 							'		<th colspan="2" class="query" #CollapseTable#>#LabelText#query</td>' & C &
@@ -643,7 +647,7 @@ public function DumpVar(any Var,
 			}
 			writeoutput('</table>');
 
-			if (Arguments.metainfo AND ServerInfo[1] EQ "ColdFusion Server") {
+			if (StructKeyExists(variables,"QueryResult") AND Arguments.metainfo AND ServerInfo[1] EQ "ColdFusion Server") {
 				writeoutput('		</td>' & C &
 							'	</tr>' & C &
 							'	<tr>' & C &
@@ -657,9 +661,9 @@ public function DumpVar(any Var,
 							'	<tr>' & C &
 							'		<td class="query" #CollapseRow#>SQL</td>' & C &
 							'		<td class="Dump_Cell"><pre>#QuerySQL#</pre></td>' & C &
-							'	</tr>' & C &
-							'</table>' & C);
+							'	</tr>' & C);
 			}
+			if (VarType NEQ "FileListTable") writeoutput('</table>' & C);
 
 		} else { // format="text"
 			if (Arguments.metainfo AND ServerInfo[1] EQ "ColdFusion Server") {
@@ -880,8 +884,26 @@ public function DumpVar(any Var,
 		return;
 	}
 
-  // Pass objects not handled by this tag to the cf engine
-  writedump(Var=Arguments.Var,Output=Arguments.Output,Format=Arguments.Format,Abort=Arguments.Abort,Label=Arguments.Label,Metainfo=Arguments.Metainfo,Top=Arguments.Top,Show=Arguments.Show,Hide=Arguments.Hide,Keys=Arguments.Keys,Expand=Arguments.Expand,ShowUDFs=Arguments.ShowUDFs);
+	// Pass on unhandled variables to cfdump
+	writeoutput("Unknown type [#VarType#]<br>");
+	writeoutput("IsArray: " & IsArray(Arguments.Var) & "<br>");
+	writeoutput("IsBinary: " & IsBinary(Arguments.Var) & "<br>");
+	writeoutput("IsBoolean: " & IsBoolean(Arguments.Var) & "<br>");
+	writeoutput("IsCustomFunction: " & IsCustomFunction(Arguments.Var) & "<br>");
+	writeoutput("IsDate: " & IsDate(Arguments.Var) & "<br>");
+	writeoutput("IsImage: " & IsImage(Arguments.Var) & "<br>");
+	writeoutput("IsJSON: " & IsJSON(Arguments.Var) & "<br>");
+	writeoutput("IsNULL: " & IsNULL(Arguments.Var) & "<br>");
+	writeoutput("IsNumeric: " & IsNumeric(Arguments.Var) & "<br>");
+	writeoutput("IsNumericDate: " & IsNumericDate(Arguments.Var) & "<br>");
+	writeoutput("IsObject: " & IsObject(Arguments.Var) & "<br>");
+	writeoutput("IsQuery: " & IsQuery(Arguments.Var) & "<br>");
+	writeoutput("IsSimpleValue: " & IsSimpleValue(Arguments.Var) & "<br>");
+	writeoutput("IsSpreadsheetObject: " & IsSpreadsheetObject(Arguments.Var) & "<br>");
+	writeoutput("IsStruct: " & IsStruct(Arguments.Var) & "<br>");
+	writeoutput("IsWDDX: " & IsWDDX(Arguments.Var) & "<br>");
+	if (ListFirst(ServerInfo[2]) GTE 2025) writeoutput("IsXML: " & IsXML(Arguments.Var) & "<br>");
+	//writedump(Var=Arguments.Var,Output=Arguments.Output,Format=Arguments.Format,Abort=Arguments.Abort,Label=Arguments.Label,Metainfo=Arguments.Metainfo,Top=Arguments.Top,Show=Arguments.Show,Hide=Arguments.Hide,Keys=Arguments.Keys,Expand=Arguments.Expand,ShowUDFs=Arguments.ShowUDFs);
 	CFDumpVar_CloseOutTextOutput(Arguments.RecurseInc);
 	return;
 }
